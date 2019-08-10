@@ -1,0 +1,28 @@
+{
+  "name": "@angular/chrome-file-system-api",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Davileal/chrome-file-system-api.git"
+  },
+  "author": {
+    "name": "Davi Leal",
+    "email": "davitleal@outlook.com.br"
+  },
+  "keywords": [
+    "angular"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Davileal/chrome-file-system-api.git/issues"
+  },
+  "main": "chrome-file-system-api.umd.js",
+  "module": "chrome-file-system-api.js",
+  "jsnext:main": "chrome-file-system-api.js",
+  "typings": "chrome-file-system-api.d.ts",
+  "peerDependencies": {
+    "@angular/core": "^4.0.0",
+    "rxjs": "^5.1.0",
+    "zone.js": "^0.8.4"
+  }
+}
