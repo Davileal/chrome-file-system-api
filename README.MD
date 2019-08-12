@@ -8,11 +8,12 @@ To install this library, run:
 $ npm install chrome-file-system-api --save
 ```
 
-and then from your Angular `AppModule`:
+## Usage
 
 ```typescript
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { ChromeFileSystemService } from 'chrome-file-system-api';
 
 
 @NgModule({
@@ -21,30 +22,22 @@ import { NgModule } from '@angular/core';
   ],
   imports: [
     BrowserModule,
-
-    // Specify your library as an import
-    ChromeFileSystemModule
   ],
-  providers: [],
+  providers: [ChromeFileSystemService],
   bootstrap: []
 })
 export class AppModule { }
 ```
 
-## Development
+## Methods
 
-To generate all `*.js`, `*.d.ts` and `*.metadata.json` files:
-
-```bash
-$ npm run build
-```
-
-To lint all `*.ts` files:
-
-```bash
-$ npm run lint
-```
-
+| Method                      | Param              | Description
+| --------------------------- |:-------------:     | -----------:
+| createFile()                | File name          | Creates a new file
+| createDirectory()           | Directory name     | Creates a new directory
+| writeFile()                 | Path and blob file | Saves a blob file
+| readFile()                  | Path and return type | Reads a file and return a blob or text content (according the return type)
+| deleteFile()                | File name          | Deletes a file by name
 ## License
-
+| deleteDirectory()           | Directory Name     | Deletes a directory by directoryName
 MIT © [Davi Leal](mailto:davitleal@outlook.com.br)
