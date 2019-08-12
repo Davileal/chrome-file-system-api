@@ -31,13 +31,14 @@ export class AppModule { }
 
 ## Methods
 
-| Method                      | Param              | Description
-| --------------------------- |:-------------:     | -----------:
-| createFile()                | File name          | Creates a new file
-| createDirectory()           | Directory name     | Creates a new directory
-| writeFile()                 | Path and blob file | Saves a blob file
-| readFile()                  | Path and return type | Reads a file and return a blob or text content (according the return type)
-| deleteFile()                | File name          | Deletes a file by name
+| Method                      | Param              | Description |
+| :-------------------------: |:-------------:     | :-----------:
+| createFile()                | File name          | Creates a new file |
+| createDirectory()           | Directory name     | Creates a new directory |
+| writeFile()                 | Path and blob file | Saves a blob file |
+| readFile()                  | Path and return type | Reads a file and return a blob or text content (according the return type) |
+| deleteFile()                | File name          | Deletes a file by name |
+| deleteDirectory()           | Directory Name     | Deletes a directory by directoryName |
+
 ## License
-| deleteDirectory()           | Directory Name     | Deletes a directory by directoryName
 MIT © [Davi Leal](mailto:davitleal@outlook.com.br)
