@@ -5,7 +5,8 @@ import {
     RETURN_TYPE,
     STATUS_INITIAZING,
     STATUS_OK,
-    STATUS_REQUESTED_PERMISSION_WITH_ERROR
+    STATUS_REQUESTED_PERMISSION_WITH_ERROR,
+    TIMEOUT_FOR_IO
 } from "./chrome-file-system-api.constants";
 
 @Injectable()
@@ -20,96 +21,136 @@ export class ChromeFileSystemService {
 
     constructor() {
         this.status = STATUS_INITIAZING;
-        this.requestQuota();
-        this.requestFileSystem();
-        this.updateUsageAndQuota();
+        this.requestQuota().then(() => {
+            this.requestFileSystem().then(() => {
+                this.updateUsageAndQuota().then(() => {
+                    this.status = STATUS_OK;
+                });
+            });
+        });
     }
 
     public createFile(fileName: string): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.fs.root.getFile(fileName, {create: true, exclusive: true}, (fileEntry) => {
-                resolve(fileEntry);
-            }, (error) => {
-                reject(error);
-            });
+            if (this.status === STATUS_OK) {
+                this.fs.root.getFile(fileName, {create: true, exclusive: true}, (fileEntry) => {
+                    resolve(fileEntry);
+                }, (error) => {
+                    reject(error);
+                });
+            } else {
+                setTimeout(() => {
+                    this.createFile(fileName);
+                }, TIMEOUT_FOR_IO);
+            }
         });
     }
 
     public createDirectory(directoryName: string): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.fs.root.getDirectory(directoryName, {create: true}, (directoryEntry) => {
-                console.debug('Directory created:', directoryEntry);
-                resolve(directoryEntry);
-            }, (error) => {
-                reject(error);
-            });
+            if (this.status === STATUS_OK) {
+                this.fs.root.getDirectory(directoryName, {create: true}, (directoryEntry) => {
+                    console.debug('Directory created:', directoryEntry);
+                    resolve(directoryEntry);
+                }, (error) => {
+                    reject(error);
+                });
+            } else {
+                setTimeout(() => {
+                    this.createDirectory(directoryName);
+                }, TIMEOUT_FOR_IO);
+            }
         });
     }
 
     public writeFile(path: string, file: Blob): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.fs.root.getFile(path, {create: true}, (fileEntry) => {
-                fileEntry.createWriter((fileWriter) => {
-                    fileWriter.onwriteend = (e) => {
-                        resolve(e);
-                    };
-                    fileWriter.onerror = (e) => {
-                        reject(e);
-                    };
-                    fileWriter.write(file);
+            if (this.status === STATUS_OK) {
+                this.fs.root.getFile(path, {create: true}, (fileEntry) => {
+                    fileEntry.createWriter((fileWriter) => {
+                        fileWriter.onwriteend = (e) => {
+                            resolve(e);
+                        };
+                        fileWriter.onerror = (e) => {
+                            reject(e);
+                        };
+                        fileWriter.write(file);
+                    }, (error) => {
+                        reject(error);
+                    });
                 }, (error) => {
                     reject(error);
                 });
-            }, (error) => {
-                reject(error);
-            });
+            } else {
+                setTimeout(() => {
+                    this.writeFile(path, file);
+                }, TIMEOUT_FOR_IO);
+            }
         });
     }
 
     public readFile(path: string, returnType: string): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.fs.root.getFile(path, {}, (fileEntry) => {
-                fileEntry.file((file) => {
-                    const reader = new FileReader();
-                    if (returnType === RETURN_TYPE.TEXT) {
-                        if (file) {
-                            reader.readAsText(file);
+            if (this.status === STATUS_OK) {
+                this.fs.root.getFile(path, {}, (fileEntry) => {
+                    fileEntry.file((file) => {
+                        const reader = new FileReader();
+                        if (returnType === RETURN_TYPE.TEXT) {
+                            if (file) {
+                                reader.readAsText(file);
+                            }
+                            reader.onerror = (event) => {
+                                reject(event);
+                            };
+                            reader.onloadend = () => {
+                                resolve(reader.result);
+                            };
+                        } else if (returnType === RETURN_TYPE.BLOB) {
+                            resolve(file);
                         }
-                        reader.onerror = (event) => {
-                            reject(event);
-                        };
-                        reader.onloadend = () => {
-                            resolve(reader.result);
-                        };
-                    } else if (returnType === RETURN_TYPE.BLOB) {
-                        resolve(file);
-                    }
+                    });
                 });
-            });
+            } else {
+                setTimeout(() => {
+                    this.readFile(path, returnType);
+                }, TIMEOUT_FOR_IO);
+            }
         });
     }
 
     public deleteFile(fileName: string): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.fs.root.getFile(fileName, {create: false}, (fileEntry) => {
-                    fileEntry.remove((ev) => {
-                        this.updateUsageAndQuota();
-                        resolve(ev);
-                    }, (error) => {
-                        reject(error);
-                    });
-                }, (error) => reject(error)
-            );
+            if (this.status === STATUS_OK) {
+                this.fs.root.getFile(fileName, {create: false}, (fileEntry) => {
+                        fileEntry.remove(async (ev) => {
+                            await this.updateUsageAndQuota();
+                            resolve(ev);
+                        }, (error) => {
+                            reject(error);
+                        });
+                    }, (error) => reject(error)
+                );
+            } else {
+                setTimeout(() => {
+                    this.deleteFile(fileName);
+                }, TIMEOUT_FOR_IO);
+            }
         });
     }
 
     public deleteDirectory(directoryName: string) {
         return new Promise((resolve, reject) => {
-            this.fs.root.getDirectory(directoryName, {}, (directoryEntry) => {
-                resolve(directoryEntry.removeRecursively(() => console.debug('Directory removed:', directoryName)));
-            }, (error) => {
-                reject(error);
-            });
+            if (this.status === STATUS_OK) {
+                this.fs.root.getDirectory(directoryName, {}, (directoryEntry) => {
+                    resolve(directoryEntry.removeRecursively(() => console.debug('Directory removed:', directoryName)));
+                }, (error) => {
+                    reject(error);
+                });
+            } else {
+                setTimeout(() => {
+                    this.deleteDirectory(directoryName);
+                }, TIMEOUT_FOR_IO);
+            }
         });
     }
 
@@ -128,17 +169,6 @@ export class ChromeFileSystemService {
         });
     }
 
-    private requestFileSystem(): Promise<any> {
-        return new Promise((resolve, reject) => {
-            (window as any).webkitRequestFileSystem(PERSISTENT, FILE_SYSTEM_SIZE, (fs) => {
-                this.fs = fs;
-                resolve();
-            }, (error) => {
-                reject(error);
-            });
-        });
-    }
-
     private updateUsageAndQuota(): Promise<any> {
         return new Promise((resolve, reject) => {
             (navigator as any).webkitPersistentStorage.queryUsageAndQuota(
@@ -151,6 +181,21 @@ export class ChromeFileSystemService {
                 }
             );
         });
+    }
+
+    private requestFileSystem(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            (window as any).webkitRequestFileSystem(PERSISTENT, FILE_SYSTEM_SIZE, (fs) => {
+                this.fs = fs;
+                resolve();
+            }, (error) => {
+                reject(error);
+            });
+        });
+    }
+
+    private waitForIO() {
+
     }
 
 }

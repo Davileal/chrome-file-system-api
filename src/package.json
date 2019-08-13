@@ -1,6 +1,6 @@
 {
-  "name": "@angular/chrome-file-system-api",
-  "version": "0.1.0",
+  "name": "chrome-file-system-api",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/Davileal/chrome-file-system-api.git"

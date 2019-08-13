@@ -1,24 +1,26 @@
 /**
  * This is only for local test
  */
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { Component } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import {BrowserModule} from '@angular/platform-browser';
+import {Component, NgModule} from '@angular/core';
+import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
 
-import { SampleModule }  from 'chrome-file-system-api';
+import {ChromeFileSystemModule} from 'chrome-file-system-api';
 
 @Component({
-  selector: 'app',
-  template: `<sample-component></sample-component>`
+    selector: 'app',
+    template: `
+        <h1>Hello world</h1>`
 })
-class AppComponent {}
+class AppComponent {
+}
 
 @NgModule({
-  bootstrap: [ AppComponent ],
-  declarations: [ AppComponent ],
-  imports: [ BrowserModule, SampleModule ]
+    bootstrap: [AppComponent],
+    declarations: [AppComponent],
+    imports: [BrowserModule, ChromeFileSystemModule]
 })
-class AppModule {}
+class AppModule {
+}
 
 platformBrowserDynamic().bootstrapModule(AppModule);
