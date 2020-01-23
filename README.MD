@@ -2,7 +2,7 @@
 
 ## Installation
 
-To install this library, run:
+To install this library, run the command:
 
 ```bash
 $ npm install chrome-file-system-api --save
